@@ -8,7 +8,7 @@ namespace WebBedsTask.Models
     /// <summary>
     /// This class represent the Supplier API response of findBargain method
     /// </summary>
-    public class Bargain
+    public class HotelAvailability
     {
         public Hotel Hotel { get; set; }
         public List<Rate> Rates { get; set; }

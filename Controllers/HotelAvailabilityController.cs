@@ -39,14 +39,14 @@ namespace WebBedsTask.Controllers
         /// </returns>
 
         [HttpGet]
-        public ActionResult<IEnumerable<Bargain>> GetHotelsAvailabilities(long destinationId, int nights, string code, bool useDummyApi = false)
+        public ActionResult<IEnumerable<HotelAvailability>> GetHotelsAvailabilities(long destinationId, int nights, string code, bool useDummyApi = false)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(code))
                     throw new UnauthorizedAccessException();
 
-                List<Bargain> result = new List<Bargain>();
+                List<HotelAvailability> result = new List<HotelAvailability>();
 
                 string _ContentType = "application/json";
 
@@ -66,8 +66,8 @@ namespace WebBedsTask.Controllers
                     {
                         PropertyNameCaseInsensitive = true,
                     };
-                    result = JsonSerializer.DeserializeAsync<List<Bargain>>(responseStream, options).Result;
-                    GetCalculatedBargain(bargins: result, nights: nights);   
+                    result = JsonSerializer.DeserializeAsync<List<HotelAvailability>>(responseStream, options).Result;
+                    GetCalculatedBargain(hotelAvailabilities: result, nights: nights);   
                 }
 
                 return Ok(result);
@@ -78,11 +78,11 @@ namespace WebBedsTask.Controllers
             }
         }
 
-        private void GetCalculatedBargain(IEnumerable<Bargain> bargins, int nights)
+        private void GetCalculatedBargain(IEnumerable<HotelAvailability> hotelAvailabilities, int nights)
         { 
-            if (bargins != null)
+            if (hotelAvailabilities != null)
             {
-                foreach (var bargin in bargins)
+                foreach (var bargin in hotelAvailabilities)
                 {
                     if (bargin.Rates != null)
                     {
