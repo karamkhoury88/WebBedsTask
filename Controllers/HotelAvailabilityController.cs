@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -31,6 +32,7 @@ namespace WebBedsTask.Controllers
         /// <param name="destinationId">Destination id</param>
         /// <param name="nights">Nights count</param>
         /// <param name="code">Auth code</param>
+        /// <param name="useDummyApi">If set to false, the service will use the real Bargains for Couples API, otherwise, it will use a dummy API created by me that ignores both destinationId and code parameters just for testing purpose</param>
         /// <returns>
         /// list of hotels with rates. 
         ///The rates have a Board Type, Value and Rate Type(Per Night or Stay). 
@@ -43,18 +45,15 @@ namespace WebBedsTask.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(code))
-                    throw new UnauthorizedAccessException();
-
                 List<HotelAvailability> result = new List<HotelAvailability>();
 
                 string _ContentType = "application/json";
 
                 string baseUrl = useDummyApi ? _dummyBargainsForCouplesApiBaseUrl : _bargainsForCouplesApiBaseUrl;
+
                 var findBargainRequest = new HttpRequestMessage(HttpMethod.Get,
                     $"{baseUrl}/findBargain?destinationId={destinationId}&nights={nights}&code={code}");
-                //findBargainRequest.Headers.Add("Content-Type", "application/json");
-               
+
                 var client = _clientFactory.CreateClient();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(_ContentType));
                 
@@ -67,8 +66,10 @@ namespace WebBedsTask.Controllers
                         PropertyNameCaseInsensitive = true,
                     };
                     result = JsonSerializer.DeserializeAsync<List<HotelAvailability>>(responseStream, options).Result;
-                    GetCalculatedBargain(hotelAvailabilities: result, nights: nights);   
+                    CalculateTotalPrice(hotelAvailabilities: result, nights: nights);   
                 }
+                else if(response.StatusCode == HttpStatusCode.Unauthorized)
+                    throw new UnauthorizedAccessException();
 
                 return Ok(result);
             }
@@ -78,7 +79,7 @@ namespace WebBedsTask.Controllers
             }
         }
 
-        private void GetCalculatedBargain(IEnumerable<HotelAvailability> hotelAvailabilities, int nights)
+        private void CalculateTotalPrice(IEnumerable<HotelAvailability> hotelAvailabilities, int nights)
         { 
             if (hotelAvailabilities != null)
             {
