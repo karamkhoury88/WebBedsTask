@@ -19,8 +19,7 @@ namespace WebBedsTask.Controllers
     {
         private readonly IHttpClientFactory _clientFactory;
         private const string _bargainsForCouplesApiBaseUrl = "https://webbedsdevtest.azurewebsites.net/api";
-        private const string _dummyBargainsForCouplesApiBaseUrl = "http://demo4413177.mockable.io/api";
-
+        
         public HotelAvailabilityController(IHttpClientFactory clientFactory)
         {
             _clientFactory = clientFactory;
@@ -32,7 +31,6 @@ namespace WebBedsTask.Controllers
         /// <param name="destinationId">Destination id</param>
         /// <param name="nights">Nights count</param>
         /// <param name="code">Auth code</param>
-        /// <param name="useDummyApi">If set to false, the service will use the real Bargains for Couples API, otherwise, it will use a dummy API created by me that ignores both destinationId and code parameters just for testing purpose</param>
         /// <returns>
         /// list of hotels with rates. 
         ///The rates have a Board Type, Value and Rate Type(Per Night or Stay). 
@@ -41,7 +39,7 @@ namespace WebBedsTask.Controllers
         /// </returns>
 
         [HttpGet]
-        public ActionResult<IEnumerable<HotelAvailability>> GetHotelsAvailabilities(long destinationId, int nights, string code, bool useDummyApi = false)
+        public ActionResult<IEnumerable<HotelAvailability>> GetHotelsAvailabilities(long destinationId, int nights, string code)
         {
             try
             {
@@ -49,7 +47,7 @@ namespace WebBedsTask.Controllers
 
                 string _ContentType = "application/json";
 
-                string baseUrl = useDummyApi ? _dummyBargainsForCouplesApiBaseUrl : _bargainsForCouplesApiBaseUrl;
+                string baseUrl = _bargainsForCouplesApiBaseUrl;
 
                 var findBargainRequest = new HttpRequestMessage(HttpMethod.Get,
                     $"{baseUrl}/findBargain?destinationId={destinationId}&nights={nights}&code={code}");
